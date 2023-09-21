@@ -1,0 +1,11 @@
+#!/bin/sh
+
+trendingGames=$(curl -s 'https://api.ggapp.io/' -X POST -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:109.0) Gecko/20100101 Firefox/117.0' -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://ggapp.io/' -H 'content-type: application/json' -H 'Origin: https://ggapp.io' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site' -H 'TE: trailers' --data-raw '{"operationName":"listTrendingGames","variables":{},"query":"query listTrendingGames {\n  listTrendingGames {\n    id\n    name\n    description\n    slug\n    token\n    coverPath\n    headerPath\n    screenshots {\n  cloudinaryId\n      url\n      __typename\n    }\n    gameScreenshots {\n      id\n      path\n      caption\n      __typename\n    }\n releaseDates {\n      date\n      __typename\n    }\n    currentUserGamePlayStatus {\n      id\n      playStatus {\n        id\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}"}' | sed '{s/\"name\":\"/\nname:/g;s/\",\"/\n/g;}' | grep name: | sed 's/name://')
+psplusGames=$(curl -s 'https://www.playstation.com/en-in/ps-plus/games/' | grep "PS Plus Games" | sed '{s/^.*data-dtm-label="[^"]*">//g;s|</a>||g;}')
+tmpDir='/tmp/psplus_test'
+
+mkdir -p $tmpDir
+echo "$trendingGames" >$tmpDir/trending
+echo "$psplusGames" >$tmpDir/psplus
+
+grep -F -f $tmpDir/trending $tmpDir/psplus
